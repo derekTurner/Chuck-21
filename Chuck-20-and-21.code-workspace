@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "..\\..\\GitHub 2020-21\\Chuck-20"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "Chuck-21"
+	}
+}
