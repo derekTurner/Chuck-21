@@ -2,9 +2,10 @@
 // listen to all OSC messages on specified port
 
 OscIn oin;
-if(me.args()) me.arg(0) => Std.atoi => oin.port;
-else 9999 => oin.port;
-oin.listenAll();
+9999 => oin.port;
+oin.listenAll();  // listen to all OSC messages on this port
+//oin.addAddress("/slider/1, ii"); // listen only to slider 1
+
 
 OscMsg msg;
 string data;

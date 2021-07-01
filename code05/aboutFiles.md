@@ -91,3 +91,16 @@ The aim now is to provide a standard interface to allow the html sliders to cont
 
 KeyorganMap.ck is triggering notes in response to the alphanumeric keyboard.  The oscMonitor.ck is monitoring the osc messages coming in and mapping these to parameter setting functions in Sound.ck.  The object is to confine the code which needs to be edited to the Sound.ck file, the other files provide library functions which do not need to be altered.
 
+Run bridge.exe (or equivalent) and sliderTemplate.html then open all these files in a single command "chuck Sound.ck OscMonitor.ck keyorganMapSpork.ck"
+
+The keyboard plays notes, the ADSR of the sound can be controlled by sliders and the effect auditioned.
+
+This now provides a convenient way of investigating sound patches with parameters. The code in sound.ck can be edited to try out different patches.  Take care to copy the final patch into a second file to be caled back later.  In this case I have saved the working patch form Sound.ck to SoundSinEnvParam.ck.
+
+* Take care on closing!  When you close the programme press control - pause till message All done appers - and then control +c.
+  
+# odeADSR
+
+Once the sound has been refined and control parameters set it can be used to play a piece of programmed music with the slider control still in place.
+
+To show this we will go back to 
