@@ -29,8 +29,6 @@ Sound snd => dac;
 
 OscMonitor oscmon;
 spork ~ oscmon.oscGo(snd);
-
-
 spork ~ monitorKeyboard(snd);
 
 while(running){1::second => now;<<<"1 second loop">>>;};

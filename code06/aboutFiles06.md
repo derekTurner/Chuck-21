@@ -1,52 +1,4 @@
 
-# odes
-
-Files in the odes folder working with tune of Ode to Joy towards playing tune and harmony on different sounds loaded from separate files.
-
-## odearray.ck
-
-Refactoring to play tune from midi notes, tick durations and velocities
-
-## odefunction.ck
-
-Refactoring to move player code into a fuction.
-
-## odespork.ck
-
-Refactoring to run player function in own thread
-
-## odedemo1.ck
-
-Develop the odespork.ck code to play tune and harmony on two sine wave oscillators
-
-## odedemo2.ck
-
-Develop the odedemo1.ck code to play tune on harmony on separate sound patches, simply a sine and a triangle oscillator.
-
-## odesplayer1.ck and sound.ck soundSine.ck
-
-Develop odeplayer.ck from odespork.ck to read sound in from a separate sound patch file a separate class file. 
-Develop sound in sound.ck using chubgraph then save it for later use in this case into soundSine.
-To restore any sound patch then simply copy the relevent SoundMysound.ck file into Sound.ck 
-I will save files containing classes with filenames starting with a capital letter.
-
-## odesplayer2.ck and Sound1.ck Sound2.ck
-
-Adapt from odedemo 2 into odesplayer1.ck to make odesplayer2 play from two external sound files Sound1.ck and Sound2.ck
-Note that the class names in these files need to match the file name so Sound1 and Sound 2 rather than just Sound.
-
-# keyorgan
-
-Make sounds in classes playable from a keyorgan for ease of auditioning during sound patch development
-
-## keyorganAll.ck and Sound.ck 
-
-Play the sound in Sound.ck from the alphanumeric keyboard using key numbers to produce midi notes
-
-## keyorganMap.ck and Sound.ck 
-
-Play the sound in Sound.ck from the alphanumeric keyboard using keboard mapping so that letters map to a piano keyboard pattern.
-
 # slider
 
 This is a test of the communication flow of open sound control messages from an HTML page containing sliders and chuck.
@@ -87,9 +39,9 @@ Sound.ck is the active sound and this is saved for later use in SoundSinEnv.ck. 
 
 The aim now is to provide a standard interface to allow the html sliders to control the sound parameters.  As a first example the ADSR parameters will be controlled by the sliders.  This will need routing of the control signal flowing in from the individual sliders to the appropriate sound parameter.  The values sent by  the sliders are set to range from 0 - 127.  These values will need to be mapped onto a range of parameter values which will be useful for audio.  For instance an attack time of 127 would be way too large and 0 would produce clicks, so 0 - 127 needs to be mapped to a range typicaly 0.01 - 1.  The exact choice of mapping is up to the programmer.
 
-# keyorganMap.ck Sound.ck OscMonitor.ck SoundSinEnvParam.ck
+# keyorganMapSpork.ck Sound.ck OscMonitor.ck SoundSinEnvParam.ck
 
-KeyorganMap.ck is triggering notes in response to the alphanumeric keyboard.  The oscMonitor.ck is monitoring the osc messages coming in and mapping these to parameter setting functions in Sound.ck.  The object is to confine the code which needs to be edited to the Sound.ck file, the other files provide library functions which do not need to be altered.
+KeyorganMapSpork.ck is triggering notes in response to the alphanumeric keyboard.  The oscMonitor.ck is monitoring the osc messages coming in and mapping these to parameter setting functions in Sound.ck.  The object is to confine the code which needs to be edited to the Sound.ck file, the other files provide library functions which do not need to be altered.
 
 Run bridge.exe (or equivalent) and sliderTemplate.html then open all these files in a single command "chuck Sound.ck OscMonitor.ck keyorganMapSpork.ck"
 

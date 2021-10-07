@@ -8,8 +8,5 @@ public class Sound extends Chubgraph
    function void noteOff(float vel){0.0 => s.gain;}
    
    function void setFreq(float Hz){Hz => s.freq;}
-   
-  
-   
-   
+
 }
