@@ -1,4 +1,5 @@
-//ode to joy using arrays
+//ode to joy using a single sporked player
+// chuck odespork.ck
 
 120 => float tempo;
 

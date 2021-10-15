@@ -1,4 +1,5 @@
-//ode to joy using arrays
+//ode to joy using two sporked players with different voices
+// chuck odedemo2.ck
 
 120 => float tempo;
 
@@ -18,13 +19,14 @@
 [1.0, 0.0, 0.0, 0.0 ,1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0] @=> float harVelocities[];
 
 Event start;
+SinOsc a => dac; 
+TriOsc b => dac; 
 
-SinOsc a => dac;
-SinOsc b => dac;
+
 0 => a.gain => b.gain;
 
-spork ~ player(melNotes, myDurs, myVelocities, a, start);
-spork ~ player(harNotes, harDurs, harVelocities, b, start);
+spork ~ sinPlayer(melNotes, myDurs,  myVelocities,  a, start);
+spork ~ triPlayer(harNotes, harDurs, harVelocities, b, start);
 5.0 * second => now;
 start.broadcast();
 
@@ -34,7 +36,21 @@ while(true){// main loop
 
 //---------------------- voice playing functions --------------//
 
-function void player(int N[], int D[], float V[], SinOsc generator, Event start){
+function void sinPlayer(int N[], int D[], float V[], SinOsc generator, Event start){
+    while( true){
+        0 => generator.gain ;
+        start => now;
+        for (1 => int i; i <= 4; i++) {// four repeats
+            for (0 =>int index; index < N.cap(); index ++){ //for each element of the array
+                Std.mtof(N[index])      => generator.freq;
+                V[index]   * 0.2    => generator.gain;
+                D[index] * tick :: second => now;
+            }
+        }
+    }
+}
+
+function void triPlayer(int N[], int D[], float V[], TriOsc generator, Event start){
     while( true){
         0 => generator.gain ;
         start => now;
