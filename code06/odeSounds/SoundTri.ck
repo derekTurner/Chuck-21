@@ -1,6 +1,6 @@
 public class Sound extends Chubgraph
 {
-   SinOsc s => outlet;
+   TriOsc s => outlet;
     0 => s.gain ;
    
    function void noteOn(float vel ){0.2 => s.gain;}
