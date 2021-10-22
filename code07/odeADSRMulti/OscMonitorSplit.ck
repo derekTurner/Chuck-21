@@ -1,4 +1,4 @@
-public class OscMonitor
+public class OscMonitorSplit
 {
  // setup osc
  // splits osc control to different sounds by slider number
@@ -10,7 +10,7 @@ public class OscMonitor
 
 
 
-    function void oscGo(Sound snd){  
+    function void oscGo(Sound1 snd1, Sound2 snd2, Sound3 snd3){  
         while(true)
         {
             oin => now;
@@ -23,19 +23,13 @@ public class OscMonitor
                     }                 
                 } 
                 <<< msg.address,": ", gui[0]," ",gui[1] >>>;
-                snd.oscSlider( gui[0], gui[1]);                                     
+                snd1.oscSlider( gui[0], gui[1]);  
+                snd2.oscSlider( gui[0], gui[1]);  
+                snd3.oscSlider( gui[0], gui[1]);                                    
             }
         }  
     }  
+
+    
 }
 
-// include lines below for standalone testing
-/*
-Sound snd;
-
-
-OscMonitor oscmon;
-spork ~ oscmon.oscGo(snd);
-
-while(true){1::second => now;<<<"1 second loop">>>;};
-*/

@@ -1,4 +1,4 @@
-public class Sound extends Chubgraph
+public class Sound3 extends Chubgraph
 {
 
    // starting and max values for ADSR parameters
@@ -14,7 +14,7 @@ public class Sound extends Chubgraph
    
 
    SawOsc s => ADSR env => outlet;
-   1 => s.gain;
+   0.5 => s.gain;
 
    env.set(attack :: second, decay :: second, sustain, release :: second);
    <<<env.state()>>>; // print env state 0 atack 1 decay 2 sustain 3 release 4 done
