@@ -2,7 +2,7 @@
 //Now reading note arrays form a file
 //chuck Sound.ck odeReader.ck
 
-120 => float tempo;
+40 => float tempo;
 
 60/(tempo * 192) => float tick;
 
@@ -16,7 +16,7 @@ float myVelocities[0];
 Sound snd => dac;
 0.0 =>snd.noteOff;
 
-"odePart1.txt" => string filename;
+"mdv/OdeToJoy1.txt" => string filename;
 retrieve(melNotes, myDurs, myVelocities);
 
 
@@ -39,7 +39,7 @@ function void retrieve(int notes[], int durations[], float velocities[] ){
     FileIO datafile;
     datafile.open(filepath, FileIO.READ | FileIO.ASCII  );
     Std.atoi( datafile.readLine()) => cap;
-    <<< cap >>>;
+    //<<< "array length " ,cap >>>;
     cap => notes.size;
     cap => durations.size;
     cap => velocities.size;
@@ -47,7 +47,7 @@ function void retrieve(int notes[], int durations[], float velocities[] ){
     for( 0 => int i; i < cap; i++ ){Std.atoi(datafile.readLine())=>(durations[i]);}
     for( 0 => int i; i < cap; i++ ){Std.atof(datafile.readLine())=>(velocities[i]);}
     datafile.close();
-    <<<cap, notes ,durations, velocities >>>; // prints pointer to arrays not array values.
+    //<<<cap, notes ,durations, velocities >>>; // prints pointer to arrays not array values.
 }
 
 //---------------------- voice playing functions --------------//
