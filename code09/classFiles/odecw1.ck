@@ -1,4 +1,4 @@
-//ode to joy with harmony from abc files using a voicform sound patch
+//ode to joy with harmony from abc files
 
 30 => float tempo; //bpm
 
@@ -24,18 +24,17 @@ myReader.readFile(harNotes, harDurs, harVelocities, abcfile);
 Event start;
 
 // sound patches
-VoicForm singer => Gain master =>dac;
+Bowed viol1 => Gain master =>dac;
 Bowed viol2 => master;
 0.5 => master.gain;
-0.05 => singer.vibratoGain;
 
 // Bowed needs noteOn to kick start!
-4 => singer.phonemeNum;          // (1) Selects vowel by number
-1 => singer.noteOn;
+1 => viol1.noteOn;
+1 => viol2.noteOn;
 
 
 spork ~ oscGo(); 
-spork ~ Player1(melNotes, myDurs,  myVelocities,  singer, start);
+spork ~ Player1(melNotes, myDurs,  myVelocities,  viol1, start);
 spork ~ Player2(harNotes, harDurs, harVelocities, viol2, start);
 0.5 * second => now;
 start.broadcast();
@@ -47,7 +46,7 @@ while(true){// main loop
 
 //---------------------- voice playing functions --------------//
 
-function void Player1(int N[], int D[], float V[], VoicForm generator, Event start){
+function void Player1(int N[], int D[], float V[], Bowed generator, Event start){
     while( true){
         0 => generator.gain ;
         start => now;
@@ -86,12 +85,12 @@ function void Player2(int N[], int D[], float V[], Bowed generator, Event start)
   
 // edit to set effect of each slider 
    function void oscSlider(int sliderNo, float value){  // value 0 - 127
-        if(sliderNo == 0){value/127   => singer.vibratoGain; }
-        if(sliderNo == 1){ }
-        if(sliderNo == 2){  }
-        if(sliderNo == 3){  }
+        if(sliderNo == 0){ value/127   => viol1.bowPressure;}
+        if(sliderNo == 1){ value/127   => viol1.bowPosition;}
+        if(sliderNo == 2){ 10 * value/127    => viol1.vibratoFreq; }
+        if(sliderNo == 3){ value/127    => viol1.vibratoGain; }
         if(sliderNo == 4){ };// rate not implemented
-        if(sliderNo == 5){ }                                      
+        if(sliderNo == 5){ value/127    => viol1.volume;}                                      
 } 
 
 
