@@ -1,0 +1,9 @@
+X:1
+T:Title
+C:Composer
+L:1/8
+M:4/4
+I:linebreak $
+K:C
+ c'bab c'c'ba | b3 ^g a^d e2 | abc'a ^g=g^f=f | e4 d4 | c'bab c'c'ba | b3 ^g ^f=f e2 | %6
+ c'bac' ba^g^f | e3 ^g a4 |] %8
