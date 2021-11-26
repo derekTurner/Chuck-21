@@ -60,6 +60,6 @@ function void playPattern (int myBufs[], int myDurs[]  ,float myVelocities[]){
     for (0 =>int index; index < myBufs.cap(); index ++){ //for each element of the array
         0 => buffers[myBufs[index]].pos;
         myVelocities[index]   * 0.2    => buffers[myBufs[index]].gain;
-        myDurs[index] * tick :: second => now;
+        myDurs[index] * tick  :: second => now;
     }
 }

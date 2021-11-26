@@ -1,5 +1,7 @@
 // load array of sounds using a function
-// chuck samplefunctionpattern.ck
+// chuck samplefunctionpattern001.ck
+
+// All wav files are stereo so need sndBuf2
 
 120 => float tempo;
 60/(tempo * 192) => float tick;
@@ -18,16 +20,18 @@
 [ 96,  96,  96,  96, 96,  192, 192, 288, 192, 96,   96,  96, 288, 96,   96] @=>int myDurs2[];
 [1.0, 1.0, 0.5, 1.0, 1.0, 0.5, 1.0, 1.0, 0.5, 1.0, 1.0, 0.7, 1.0, 1.0, 1.0] @=> float myVelocities2[];
 
-[ 0 , 0, 0] @=> int bufs3[];
+[2 ,2, 2] @=> int bufs3[];
 [ 500, 500,500] @=>int myDurs3[];
-[1.0, 0.0, 1.0] @=> float myVelocities3[];
+[0.0, 0.0, 1.0] @=> float myVelocities3[];
 
 // load the files and route to samples gain element
 "Amen/" => string samplepath;
-["AmenMain_L+R.WAV"] @=> string samplefiles[];
+//["AmenMain_L+R.WAV"] @=> string samplefiles[];
+["crashLong.WAV"] @=> string samplefiles[];
 samplefiles << "crash01.wav";
-/*
+
 samplefiles << "crashLong.WAV";
+/*
 samplefiles << "dbKick01.WAV";
 samplefiles << "dbKick02.WAV";
 samplefiles << "dbKick03.WAV";
@@ -51,11 +55,8 @@ samplefiles << "snare05.WAV";
 samplefiles << "snare06.WAV";
 samplefiles << "snare07.WAV";
 */
-//samplefiles << "snare08.AIF";
-
-
-
-SndBuf buffers[samplefiles.cap()];
+<<<samplefiles>>>;
+SndBuf2 buffers[samplefiles.cap()];
 
 0 => int buf;
 
@@ -74,25 +75,26 @@ playPattern(buffers, bufs3, myDurs3, myVelocities3);
 
 /*--------------------- functions ----------------------------*/
 
-function void loadSamples (string path, string filenames[], SndBuf sounds[], Gain target){
+function void loadSamples (string path, string filenames[], SndBuf2 sounds[], Gain target){
     // load samples defined by path + filename into buffer array and route to target
     "null" =>  string filename;
 
     for (0 => int i;  i < filenames.cap(); i++){
         me.dir() + path + filenames[i]  =>    filename;
+        <<<filename>>>;
         filename => sounds[i].read;
         sounds[i] => target;
     }    
 }
 
-function void playPattern (SndBuf buffers[], int myBufs[], int myDurs[]  ,float myVelocities[]){
+function void playPattern (SndBuf2 buffers[], int myBufs[], int myDurs[]  ,float myVelocities[]){
     for (0 =>int index; index < myBufs.cap(); index ++){ //for each element of the array
 
         1.0 => buffers[myBufs[index]].rate;
         myVelocities[index]   * 0.2    => buffers[myBufs[index]].gain ;
-        0 => buffers[myBufs[index]].pos;
-        <<< "on" , myBufs[index]>>>;
-        myDurs[index] * tick :: second => now;
+        buffers[myBufs[index]].samples()  => buffers[myBufs[index]].pos;
+        <<< "on" , myBufs[index], buffers[myBufs[index]].samples() >>>;
+        if (myVelocities[index] >0) myDurs[index] * tick :: second => now;
         <<< "off" , myBufs[index]>>>;
         buffers[myBufs[index]].samples() => buffers[myBufs[index]].pos ;
     }
