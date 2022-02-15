@@ -68,7 +68,7 @@ playPattern(buffer, myDurs1, myVelocities1);
 function void playPattern (SndBuf2 buffer,  int myDurs[]  ,float myVelocities[]){
     for (0 =>int index; index < myDurs.cap(); index ++){ //for each element of the array
 
-        1.0 => buffer.rate;
+        3.0 => buffer.rate;
         myVelocities[index]   * 0.2    => buffer.gain ;
         
         <<< "on",  buffer.samples() >>>;
