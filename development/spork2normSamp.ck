@@ -4,10 +4,10 @@
 Event start;
 
 Gain master => dac;
-0.4 => master.gain;
+0.8 => master.gain;
 
 spork ~ track1(start);
-spork ~ track2(start);
+// spork ~ track2(start);
 3.0 * second => now;
 start.broadcast();
 
@@ -48,19 +48,22 @@ function float normRand(int n, float sigma, float mean ){
 
 function void track1 (Event start){
 
-    "../audio/" => string samplepath;
+    "../foley/dirt/" => string samplepath;
     ["clap_01.wav"] @=> string samplefiles[];
-    samplefiles << "click_01.wav";
-    samplefiles << "click_02.wav";
-    samplefiles << "cowbell_01.wav";
-    samplefiles << "hihat_01.wav";
+    samplefiles << "dirt-001.wav";
+    samplefiles << "dirt-002.wav";
+    samplefiles << "dirt-003.wav";
+    samplefiles << "dirt-004.wav";
+    samplefiles << "dirt-005.wav";
+    samplefiles << "dirt-006.wav";
+    samplefiles << "dirt-007.wav";
     SndBuf buffers[samplefiles.cap()];
 
     0 => int buf;
 
     // the patch 
     Gain samples => master;
-    0.6 => samples.gain;
+    0.8 => samples.gain;
 
     loadSamples (samplepath, samplefiles, buffers, samples);
 
@@ -71,9 +74,9 @@ function void track1 (Event start){
     {
         Math.random2(0,buffers.cap()-1) => buf;
         0 => buffers[buf].pos;
-        normRand(20, 0.05, 0.3) => buffers[buf].gain;
-        normRand(20, 0.1, 1) => buffers[buf].rate;
-        normRand(20, 100, 500)::ms => now;
+        normRand(20, 0.1, 0.7) => buffers[buf].gain;
+        normRand(20, 0.1, 1.0) => buffers[buf].rate;
+        normRand(20, 100, 1000)::ms => now;
     }
 
 }
