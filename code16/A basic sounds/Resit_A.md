@@ -1,5 +1,5 @@
-# Audio Programming Resit Session A
-## Making a sound
+# Audio Programming Resit 
+## A. Making a sound using synthesis
 
  This section looks at creating a sound that can be usefully used in a musical context.
 
