@@ -40,15 +40,27 @@ The keygain could be used to control sound volume initially set to 0.4 but you c
 
 ```c
 
+/*
+// PC keyboard map
 [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
  -1,-1,-1,-1,-1,-1,-1, 1, 3,-1,
   6, 8,10,-1,13,15,-1,-1,-1,-1,
   0, 2 ,4, 5, 7, 9,11,12,14,16,
  17,-1,-1,-1,-1,-1,-1,-1,-1,-1 
 ] @=> int map[];
+*/
+
+// MAC keyboard map
+[-1,-1,-1,-1, 0,-1,-1, 4, 3, 5,
+  7, 9,-1,11,12,14,-1, 1,13,15,
+ -1,-1, 2, 6,10,-1, 1,-1, 8,-1,
+ -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+ -1,-1,-1,-1,-1,-1,-1,-1,18,-1,
+ -1,16,17,-1,-1,-1,-1,-1,-1,-1
+] @=> int map[];
 
 ```
-An array maps the keyboard to midi values over a 17 semitone range.  Keys mapped to -1 do not sound.  The mapping listed here works with a PC, a different pattern would be needed for a mac keyboard.
+An array maps the keyboard to midi values over a 17 semitone range.  Keys mapped to -1 do not sound.  The mapping listed here works with a PC, a different pattern would be needed for a mac keyboard.  Use the multiline comment /*    */ to comment out the array you are not using depending on machine type.
 ```c
 
 // which keyboard
@@ -81,7 +93,7 @@ Sending a noteOff makes sure the programme starts silently.
 ```c
 
 // infinite event loop till control key is pressed
-while( msg.which != 29 )
+while( (msg.which != 29) & (msg.which != 224))
 {
     // wait for event
     hi => now;

@@ -42,11 +42,23 @@ int semitone;
 Rather  than use a midinote the samples will be played up and down in semitone steps from the samples recorded pitch.  A semitone variable is defined to manage this.
 
 ```c
+/*
+// PC keyboard map
 [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
  -1,-1,-1,-1,-1,-1,-1, 1, 3,-1,
   6, 8,10,-1,13,15,-1,-1,-1,-1,
   0, 2 ,4, 5, 7, 9,11,12,14,16,
  17,-1,-1,-1,-1,-1,-1,-1,-1,-1 
+] @=> int map[];
+*/
+
+// MAC keyboard map
+[-1,-1,-1,-1, 0,-1,-1, 4, 3, 5,
+  7, 9,-1,11,12,14,-1, 1,13,15,
+ -1,-1, 2, 6,10,-1, 1,-1, 8,-1,
+ -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+ -1,-1,-1,-1,-1,-1,-1,-1,18,-1,
+ -1,16,17,-1,-1,-1,-1,-1,-1,-1
 ] @=> int map[];
 
 
@@ -76,7 +88,7 @@ The sample patch is defined in a Sample class in a separate file and connected t
 
 ```c
 // infinite event loop till control key is pressed
-while( msg.which != 29 )
+while( (msg.which != 29) & (msg.which != 224))
 {
     // wait for event
     hi => now;

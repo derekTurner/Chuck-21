@@ -7,11 +7,23 @@ HidMsg msg;
 int midiNote;
 0.4 => float keyGain;
 
+/*
+// PC keyboard map
 [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
  -1,-1,-1,-1,-1,-1,-1, 1, 3,-1,
   6, 8,10,-1,13,15,-1,-1,-1,-1,
   0, 2 ,4, 5, 7, 9,11,12,14,16,
  17,-1,-1,-1,-1,-1,-1,-1,-1,-1 
+] @=> int map[];
+*/
+
+// MAC keyboard map
+[-1,-1,-1,-1, 0,-1,-1, 4, 3, 5,
+  7, 9,-1,11,12,14,-1, 1,13,15,
+ -1,-1, 2, 6,10,-1, 1,-1, 8,-1,
+ -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+ -1,-1,-1,-1,-1,-1,-1,-1,18,-1,
+ -1,16,17,-1,-1,-1,-1,-1,-1,-1
 ] @=> int map[];
 
 // which keyboard
@@ -29,7 +41,7 @@ Sound snd => dac;
 
 
 // infinite event loop till control key is pressed
-while( msg.which != 29 )
+while( (msg.which != 29) & (msg.which != 224))
 {
     // wait for event
     hi => now;
