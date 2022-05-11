@@ -1,4 +1,4 @@
-# Audio Programming Courcework
+# Audio Programming Coursework
 ## CW1a Playing sounds and samples in a timed sequence
 
 A documented loosely structured chuck patch which plays a timed sequence of sounds combining simple synthesis and sound file playback, (20%)
