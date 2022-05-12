@@ -26,7 +26,6 @@ int midiNote;
  -1,16,17,-1,-1,-1,-1,-1,-1,-1
 ] @=> int map[];
 
-
 // which keyboard
 0 => int device;
 // get from command line
