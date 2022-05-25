@@ -310,4 +310,126 @@ In this case the low frequency oscillator depth and speed can be controlled.  Yo
 
  For other STK instruments you will need to consider how the note should be triggered on and off.
 
+ ## Adding an ADSR envelope
+
+ So far an Envelope has been added to noteOn() and noteOff() to reduce clicking due to abrupt turn on of sounds.  A more sophisticated envelope is the ADSR (attack, decay, sustain, release) envelope.  This gives shape to the notes amplitude envelope.  Attack is the time taken for the envelope to rise to its maximum value, decay is the time to decay to a level determined by sustain.  Finally, release deternines the time to decay to zero.
+
+ Copy **fnADSR** to **Sound.ck** to audition the affect of an ADSR envelope replacing the simple envelope.
+
+ ```c
+ public class Sound extends Chubgraph
+{
+
+   0.1 => float attack; // time in seconds
+   0.1 => float decay;  // time in seconds
+   0.5 => float sustain;// level 0-1
+   0.1 => float release;// time in seconds
+
+```
+Save the times and levels required into convenient variables at the top of the program.
+
+```c   
+
+   1.0 =>  float modfreq;
+   20.0 =>  float modgain;
+
+   SinOsc modulator => SinOsc carrier => ADSR env => outlet;
+
+   0.8 => carrier.gain;
+   2   => carrier.sync;  // .sync (int, READ/WRITE) (0) sync frequency to input, (1) sync phase to input, (2) fm synth     
+   modfreq => modulator.freq;  
+   modgain => modulator.gain;
+
+    env.set(attack :: second, decay :: second, sustain, release :: second);
+```
+Use the env.set() function to pass all the timing and level parameters to the envelope in on step.
+
+```c 
+
+   function void noteOn(float vel ){  
+      env.keyOn();
+   }
+
+   function void noteOff(float vel){
+      env.keyOff();
+   }
+   
+   function void setFreq(float Hz){
+      Hz => carrier.freq;
+   }
+   
+}
+ ```
+
+ The keyOn() and keyOff() functions work with ADSR in the same way as they did with Envelope.
+
+ You can experiment with different ADSR settings and could add ADSR envelopes into files with other sound patches.
+
+ ## Creative use of ADSR
+
+ ADSR envelopes can be applied to more than just output volumes. in this next example **fnADSR2.ck** a second ADSR envelope is applied to the modulator gain.
+
+ ```c
+ public class Sound extends Chubgraph
+{
+
+   0.1 => float attack; // time in seconds
+   0.1 => float decay;  // time in seconds
+   0.5 => float sustain;// level 0-1
+   0.1 => float release;// time in seconds
+
+   0.8 => float attackMod; // time in seconds
+   0.2 => float decayMod;  // time in seconds
+   0.4 => float sustainMod;// level 0-1
+   0.1 => float releaseMod;// time in seconds
+```
+The timing and level values for two ADSR parameter sets are held in convenient variables at the top of the program.
+
+```c
+   50 =>  float modfreq;
+   20.0 =>  float modgain;
+
+   SinOsc modulator => ADSR envMod => SinOsc carrier => ADSR env => outlet;
+```
+An ADSR envelope is added to the sound patch between the modulator and the carrier oscillators.
+
+```c
+   0.8 => carrier.gain;
+   2   => carrier.sync;  // .sync (int, READ/WRITE) (0) sync frequency to input, (1) sync phase to input, (2) fm synth     
+   modfreq => modulator.freq;  
+   modgain => modulator.gain;
+
+    env.set(   attack    :: second, decay       :: second, sustain, release    :: second);
+    envMod.set(attackMod :: second, decayMod :: second, sustainMod, releaseMod :: second);
+ 
+ ```
+The envelope parameters of both ADSR units are set.
+
+ ```c
+
+   function void noteOn(float vel ){  
+      env.keyOn();
+      envMod.keyOn();
+
+   }
+
+   function void noteOff(float vel){
+      env.keyOff();
+      envMod.keyOff();   
+   }
+   
+   function void setFreq(float Hz){
+      Hz => carrier.freq;
+   }
+   
+}
+ ```
+ So that these ADSR envelopes are triggered together they are both added into noteOn() and noteOff().
+
+ You can experiment with ADSR values to get the a suitable musical effect.
+
+ Are there any other places where you could use the second ADSR within this patch?
+
+ Can you add a second ADSR to other example files?
+
  
