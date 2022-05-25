@@ -2,7 +2,7 @@ public class Sound extends Chubgraph
 {
 
    1.0 =>  float modfreq;
-   0.0 =>  float modgain;
+   20.0 =>  float modgain;
 
    SinOsc modulator => SinOsc carrier => Envelope env => outlet;
 

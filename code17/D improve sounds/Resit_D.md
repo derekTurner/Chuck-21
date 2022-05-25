@@ -198,4 +198,116 @@ Reducing the modulator gain  below 0.5 should make the dips in volume not reach 
 
 ## Frequency Modulation
 
+In frequency modulation, the frequency of the carrier is raised and lowered (typically) by a sine wave modulator.  If the frequency of the modulator is low we percieve a vibrato effect.  As the modulator frequency increases this changes to a percieved tonal change.
 
+Start by copying **fm.ck** to **Sound.ck** to audition with keyorganMap.ck
+
+```c
+public class Sound extends Chubgraph
+{
+
+   1.0 =>  float modfreq;
+   20.0 =>  float modgain;
+```
+The modulation frequency is set here to a low value of 1 which will result in the frequency shift cycling above and below the carrier frequency once per second.  This will sound as vibrato.
+
+The modulation gain determines how many hertz the frequency of the carrier will be raised and lowered by the modulator.
+
+```c   
+
+   SinOsc modulator => SinOsc carrier => Envelope env => outlet;
+```
+The sound patch looks simple, the modulator is passed to the carrier, then on to and envelope to control the sound on and off without clicking.
+
+```c
+   0.8 => carrier.gain;
+   2   => carrier.sync;  // .sync (int, READ/WRITE) (0) sync frequency to input, (1) sync phase to input, (2) fm synth     
+   modfreq => modulator.freq;  
+   modgain => modulator.gain;
+```
+The carrier gain is set to a level which will avoid clipping and distortion.
+
+In its default setting the input to the SinOsc would be its frequency.  With a modulator gain of 1 this would lead to the carrier frequency being driven between -1 and +1 Hz which is clearly not the desired effect.
+
+Setting the carrier sync to 2 selects and operating mode where the carrier frequency is determined by the carrier.freq and the input to the carrier oscilator acts as a frequency offset.  So if the carrier frequency was 400 Hz, a modulator with gain of 1 would cause the carrier frequency to be driven between 399 and 400 Hz, which is frequency modulation.
+
+The modulation frequency and gain are set from the variables gathered at the top of the program.
+
+```c   
+
+   function void noteOn(float vel ){  
+      env.keyOn();
+   }
+
+   function void noteOff(float vel){
+      env.keyOff();
+   }
+   
+   function void setFreq(float Hz){
+      Hz => carrier.freq;
+   }
+   
+}
+```
+
+The noteOn() and noteOff() functions operate by triggering the envelope on and off.
+
+The carrier frequency is set in the setFreq() function by accessing the freq property.
+
+You can try changing the modulation frequency to find where the perception shift between vibrato and tone change lies.  You can also increase the modulator gain and notice that when the modulation becomes too great the sound is less natural.
+
+The modulator does not have to be a sine wave, you can try other waveforms, this will create a more complex waveform.
+
+Frequency modulation is the basis of the Ableton Operator synthesis.  Each operator is a combined unit of oscillator, gain and envelope under midi control.  Four of these units can be combined together in different configurations to create a complex sound patch.
+
+## STK UGENS
+
+ Perry R. Cook and Gary P. Scavone have produced a set of C++ language library code which they call the Sound Tool Kit (STK).  There are a range of technical papers about the code and [documentation](https://ccrma.stanford.edu/software/stk/index.html) is provided.
+
+ Some of these have been developed as chuck UGENS.  This means that a single unit generator is capable of producing a complex sound which can be controlled by a number of parameters.
+
+ The down side is that it is difficult to know the internal workings of the UGEN and some combinations of input do not lead to desired sounds.
+
+ The STK instuments are described in the [Floss Manual](https://en.flossmanuals.net/chuck/_full/#ugens-stkinstruments).  These can be very useful, but should be used sparingly.
+
+ Some of the instruments are based on FM synthesis  and the example here uses Rhodey which is a 4 operator based FM synthesis voice.
+
+ ```c
+ public class Sound extends Chubgraph
+{
+
+   Rhodey voc  => outlet;
+
+   0.8 => voc.gain;
+
+   10 =>voc.lfoSpeed;
+   0.5 => voc.lfoDepth;
+ ```
+
+The sound patch here is simple and direct.
+
+For each STK instrument you need to refer to the floss manual or examples in the stk folder to see what can can be controlled and the range of control values;
+
+In this case the low frequency oscillator depth and speed can be controlled.  You can vary these values to audition the effect.
+
+ ```c
+
+   function void noteOn(float vel ){  
+      1 => voc.noteOn;
+   }
+
+   function void noteOff(float vel){
+      0 => voc.noteOff;
+   }
+   
+   function void setFreq(float Hz){
+      Hz => voc.freq;
+   }
+   
+}
+ ```
+ The UGEN has built in ADSR envelopes so does not need to feed in to an envelope to trigger the sound.  Instead call the noteOn and noteOff functions of the instrument directly.
+
+ For other STK instruments you will need to consider how the note should be triggered on and off.
+
+ 
