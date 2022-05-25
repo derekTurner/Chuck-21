@@ -1,0 +1,201 @@
+# Improved Sounds
+
+The sound patches used so far have been fairly basic.  Although complex waveforms have been formed, the sounds have been fairly static.
+
+In this section different ways to produce a complex wave are illustrated along with ways to make the sound less static.
+
+## Wavetable version of Additive synthesis with UGENs
+
+ In the previous section a complex waveform was generated using additive synthesis.  This involved adding together sine waves of the fundamental frequency, first, second and third harmonic and so on generally progressing to smaller ammounts as the frequency is raised.
+
+ The file **Harmonics.ck** could be copied to **Sound.ck** and played with **keyorganMap.ck**.  The addition of the harmonics needed code to determine the amounts of each component to be added.
+
+ ```c
+   1.00 => float a1;  
+   0.50 => float a2;
+   0.30 => float a3;
+   0.25 => float a4;
+   0.20 => float a5;
+   0.17 => float a6;
+   0.14 => float a7;
+   0.12 => float a8;
+   0.10 => float a9;
+ ```
+The sound patch required 9 oscillators which puts a high demand on the CPU.  That is one of the greatest drawbacks of additive synthesis.
+
+```c
+   SinOsc osc1 => Gain g => Envelope env => outlet;
+   SinOsc osc2 => g;
+   SinOsc osc3 => g;
+   SinOsc osc4 => g;
+   SinOsc osc5 => g;
+   SinOsc osc6 => g;
+   SinOsc osc7 => g;
+   SinOsc osc8 => g;
+   SinOsc osc9 => g;
+
+   a1 => osc1.gain;
+   a2 => osc2.gain;
+   a3 => osc3.gain;
+   a4 => osc4.gain;
+   a5 => osc5.gain;
+   a6 => osc6.gain;
+   a7 => osc7.gain;
+   a8 => osc8.gain;
+   a9 => osc9.gain;
+```
+The [floss manual](https://en.flossmanuals.net/chuck/_full/#unit-generators) includes details of unit generators (UGENS), which include oscillators such as sine wave and triangular wave, but extends to more complex generators.
+
+One of these, GEN9 can be used to make a look up table of a waveform which is calculated form the coefficients a1 - a9.
+
+The file **gen9.ck** can be copied to **Sound.ck** to audition with **keyorganMap.ck**
+
+```c
+public class Sound extends Chubgraph
+{
+   Phasor drive => Gen9 g9 => Envelope env => outlet;
+```
+The Gen9 class is a lookup table and it is read out by a Phasor waveform which ramps from 0 - 1, flicks back to 0 and ramps over and over again.
+
+Gen9 is making sound all the time and the envelope is used to switch the output sound on and off without clicks.
+
+```c   
+
+   [1.0, 1.00, 0.0,   
+   2.0, 0.50, 0.0,   
+   3.0, 0.20, 0.0,
+   4.0, 0.25, 0.0,   
+   5.0, 0.20, 0.0,   
+   6.0, 0.17, 0.0,
+   7.0, 0.14, 0.0,   
+   8.0, 0.12, 0.0,   
+   9.0, 0.10, 0.0
+   ] => g9.coefs;
+
+```
+The data in the array is grouped into triplets corresponding to the ratio (1.0, 2.0, 3.0 ... for the harmonic series), the amplitude coefficient (1.0 for the fundamental falling to 0.10 for the 9th harmonic) and zero ( degrees ) for the phase shift.
+
+This produces a waveform lookup table matching the previous example in **Harmonics.ck**.  
+
+Although the ratios here follow the harmonic series this is not compulsary and ratios could vary to your choice (1.0, 2.1, 3.2, 4.3 ...)  likewise the coefficients and phase shifts can be freely set so that non-harmonic aounds could be produced.
+
+```c   
+
+   env.keyOff(); 
+   0.3 => g9.gain;
+
+```
+Initially set the envelope off to start with silence.
+
+Limit the gain of the Gen9 unit generator so that the sound does not clip and distort.
+
+```c   
+
+   function void noteOn(float vel ){
+      
+      env.keyOn();
+   }
+
+   function void noteOff(float vel){
+      env.keyOff();
+   }
+
+   function void setFreq(float Hz){Hz => drive.freq;}
+ 
+}
+```
+The noteOn() and noteOff() functions simply trigger the envelope on and off.
+
+To control the frequency, the Phasor drive frequency must be set.  If the drive frequency is 100 Hz it will scan from 0-1 100 times in a second, scribing out the stored waveform through 100 cycles per second.
+
+You can experiment with changing the g9 coefficients and can investigate the other UGENS GenX, Gen5,  Gen7, Gen10 and Gen17.  There are sample files in the special folder of the chuck examples.
+
+
+## Amplitude Modulation
+
+Ampitude modulation applies a sine wave (typically) modulator to the volume of a carrier signal.  When the modulator frequency is low this can be heard as a tremulo effect.
+
+As the modulator frequency increases the ear no longer hears the variation in volume but percieves a change in tone.
+
+Start by copying **Tremulo.ck** to **Sound.ck** to audition with **keyorganMap.ck**
+
+```c
+public class Sound extends Chubgraph
+{
+   1 =>     float modfreq;
+   0.5 =>   float modgain;
+   1.0 =>   float modoffset;
+```
+Set the values of key variables at the top of the programme, these wil be used below to set the modulator frequency, gain and offset.
+
+A modulation frequency of 1 should give 1 tremolo beat per second.
+
+The modulator would normally oscillate between -1 and 1.  By applying an offset of 1 the result will oscillate between 0 and 2.
+
+Applying a gain of 0.5 to offset modulator will result in an output which varies between 0 and 1.
+
+With these values we expect the modulated output of the carrier to vary between 0 and 1 so it should dip to silence once per second.
+
+```c
+   SinOsc  carrier => Gain am => Gain master => Envelope env => outlet;
+   SinOsc modulator => Gain amOffset => am;
+   Step offset => amOffset;
+```
+The sound patch passes the carrier (the audio signal we want to hear) through a Gain unit named am.  As the gain of am changes the modulation will be applied to the carrier.
+
+This is followed by a master Gain for volume control and an envelope to switch on and off without clicking.
+
+The modulator passes through a Gain unit named amOffset and the result is then sent to the Gain unit am.
+
+The Step object is one which holds the value which is set and then steps to the next value when that is set.  That value which will be set to 1 is passed to the Gain amOffset.  The Gain unit sums its inputs so 1 is added to the signal -1 to +1 which is coming from the modulator.
+
+This modulating signal is then supplied to Gain am
+
+```c   
+
+   am.op(3);//3: normal operation, multiply all inputs.    
+```
+
+Gain units usually sum their inputs, but this would not achieve the modulation we require so the op() method of the Gain is passed the value 3 which switches its operation to multiply its inputs rather than sum them.  Now modulation is achieved.
+
+```c  
+   0.1 => master.gain;
+   0.8 => carrier.gain;
+   0   => carrier.sync; // .sync (int, READ/WRITE) (0) sync frequency to input, (1) sync phase to input, (2) fm synth  
+   modfreq => modulator.freq;  
+   modgain => modulator.gain;
+   modoffset => offset.next;
+```
+The values for master gain and carrier gain are set just to prevent clipping and distortion
+
+Oscillators also have different modes of operation determined by their sync setting.  In this the carrier sync is set to zero.  This is the default value and it would have shill worked had this line been omitted.  In default operation the number fed into the oscillator sets its' frequency.
+
+```c
+
+   function void noteOn(float vel ){  
+      env.keyOn();
+   }
+
+   function void noteOff(float vel){
+      env.keyOff();
+   }
+   
+   function void setFreq(float Hz){
+      Hz => carrier.freq;
+   }
+     
+}
+```
+The noteOn() and noteOff() functions control the envelope as in previous examples.
+
+The setFreq() funcion sets the carrier frequency to the note we hear.
+
+You should try running this example with higher modulation frequencies to hear the point at which the tremolo becomes a change in tone.
+
+Reducing the offset to zero will cause the gain to pass through zero twice per cycle of the modulator so you should hear the dips to silence double in frequency.
+
+Reducing the modulator gain  below 0.5 should make the dips in volume not reach zero and this is a more normal setting for musical effect.
+
+## Frequency Modulation
+
+
