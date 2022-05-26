@@ -1,61 +1,43 @@
 public class Sound extends Chubgraph
 {
-   1.00 => float a1;  
-   0.50 => float a2;
-   0.30 => float a3;
-   0.25 => float a4;
-   0.20 => float a5;
-   0.17 => float a6;
-   0.14 => float a7;
-   0.12 => float a8;
-   0.10 => float a9;
 
+   0.1 => float attack; // time in seconds
+   0.1 => float decay;  // time in seconds
+   0.5 => float sustain;// level 0-1
+   0.1 => float release;// time in seconds
 
+   0.8 => float attackMod; // time in seconds
+   0.2 => float decayMod;  // time in seconds
+   0.4 => float sustainMod;// level 0-1
+   0.1 => float releaseMod;// time in seconds
 
-   SinOsc osc1 => Gain g => Envelope env => outlet;
-   SinOsc osc2 => g;
-   SinOsc osc3 => g;
-   SinOsc osc4 => g;
-   SinOsc osc5 => g;
-   SinOsc osc6 => g;
-   SinOsc osc7 => g;
-   SinOsc osc8 => g;
-   SinOsc osc9 => g;
+   50 =>  float modfreq;
+   20.0 =>  float modgain;
 
-   a1 => osc1.gain;
-   a2 => osc2.gain;
-   a3 => osc3.gain;
-   a4 => osc4.gain;
-   a5 => osc5.gain;
-   a6 => osc6.gain;
-   a7 => osc7.gain;
-   a8 => osc8.gain;
-   a9 => osc9.gain;
-      
-   env.keyOff();
-   0.3 => g.gain;
-   
-   function void noteOn(float vel ){
-      env.time(Math.random2f(0.01, 0.5));
+   SinOsc modulator => ADSR envMod => SinOsc carrier => ADSR env => outlet;
+
+   0.8 => carrier.gain;
+   2   => carrier.sync;  // .sync (int, READ/WRITE) (0) sync frequency to input, (1) sync phase to input, (2) fm synth     
+   modfreq => modulator.freq;  
+   modgain => modulator.gain;
+
+    env.set(   attack    :: second, decay       :: second, sustain, release    :: second);
+    envMod.set(attackMod :: second, decayMod :: second, sustainMod, releaseMod :: second);
+ 
+
+   function void noteOn(float vel ){  
       env.keyOn();
+      envMod.keyOn();
+
    }
-   
+
    function void noteOff(float vel){
       env.keyOff();
+      envMod.keyOff();   
    }
    
    function void setFreq(float Hz){
-      Hz     => osc1.freq;
-      Hz * 2 => osc2.freq;
-      Hz * 3 => osc3.freq;
-      Hz * 4 => osc4.freq;
-      Hz * 5 => osc5.freq;
-      Hz * 6 => osc6.freq;
-      Hz * 7 => osc7.freq;
-      Hz * 8 => osc8.freq;
-      Hz * 9 => osc9.freq;
-   } 
+      Hz => carrier.freq;
+   }
+   
 }
-
-
-

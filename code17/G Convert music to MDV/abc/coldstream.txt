@@ -1,0 +1,11 @@
+X:109
+T:109 The New Coldstream March [1]
+C:Aylmore MS (Lewes, 1796)
+I:abc2nwc
+M:C|
+L:1/8
+K:D
+A3/2F/2|D2d3/2A/2 F2A3/2F/2|G2g4e3/2g/2|f3/2a/2d3/2f/2 e3/2g/2c3/2e/2|d2d3/2d/2 d2A3/2F/2|
+D2d3/2A/2 F2A3/2F/2|G2g4e3/2g/2|f3/2a/2d3/2f/2 e3/2g/2c3/2e/2|d2d3/2d/2 d2|
+A3/2c/2|e2c3/2e/2 g2e3/2g/2|f3/2a/2d3/2f/2 e2A3/2c/2|e2c3/2e/2 g2e3/2g/2|f3/2a/2d3/2f/2 e2A3/2F/2|
+D2d3/2A/2 F2A3/2F/2|G2g4e3/2g/2|f3/2a/2d3/2f/2 e3/2g/2c3/2e/2|d2d3/2d/2 d2:|
