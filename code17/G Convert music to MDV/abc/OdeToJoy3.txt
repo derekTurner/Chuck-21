@@ -1,0 +1,10 @@
+X:1
+T:Title
+C:Composer
+L:1/4
+M:4/4
+I:linebreak $
+K:C
+ C, z z2 | G,, z z2 | C, z z2 | G,, z G,, G,,/G,,/ | C, z z2 | G,, z z2 | C, z z2 | G,, z C, z | 
+ G,, z G,, G,,/G,,/ | G,, z G,, G,,/G,,/ |$ G,, z G,, G,,/G,,/ | D, D, G,,2 | C, z z2 | G,, z z2 | 
+ C, z z2 | G,, z C, z |] 

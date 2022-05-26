@@ -1,0 +1,9 @@
+X:1
+T:Title
+C:Composer
+L:1/8
+M:4/4
+I:linebreak $
+K:C
+!f! A2 cd eefe | d2 B2 c4 | c2 c2 B2 A2 | ^G3 A B4 |!f! A2 cd eefe | d2 c2 B4 | c2 c2 B2 A2 | %7
+ ^G3 A A4 |] %8
