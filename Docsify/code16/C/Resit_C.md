@@ -9,7 +9,6 @@
 
  The Sample.ck file is set to play a snare sound.
 
- 
 
 ### A single sample
 
