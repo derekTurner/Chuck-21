@@ -1,0 +1,113 @@
+<!DOCTYPE HTML>
+
+<html>
+   <head>
+
+      
+      <script type = "text/javascript">
+
+      var msg =  {
+                     "slider/1":[0, 5],
+                     "slider/2":[1, 6],
+                     "slider/3":[2, 0],
+                     "slider/4":[3, 0],
+                     "slider/5":[4, 0],
+                     "slider/6":[5, 0],
+                     "slider/7":[6, 0],
+                     "slider/8":[7, 0],
+                     "slider/9":[8, 0],
+                     "slider/10":[9, 0],
+      }
+
+
+      var ws = new WebSocket("ws://localhost:9998");
+         
+      function  onload(){
+         
+         ws.onopen = function() {
+         };
+         ws.onclose = function() { 
+         };
+         ws.onmessage = function (evt) { 
+            var received_msg = evt.data;
+         };
+         
+      }      
+      function WebSocketSend() {
+            ws.send(JSON.stringify(msg));
+         }
+         
+    </script>
+    <style>
+       .slidecontainer {
+            width: 100%; /* Width of the outside container */
+        }
+
+        /* The slider itself */
+        .slider {
+            -webkit-appearance: none;  /* Override default CSS styles */
+            appearance: none;
+            width: 70%; /* Full-width */
+            height: 25px; /* Specified height */
+            background: #d3d3d3; /* Grey background */
+            outline: none; /* Remove outline */
+            opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+            -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+            transition: opacity .2s;
+        }
+
+        /* Mouse-over effects */
+        .slider:hover {
+         opacity: 1; /* Fully shown on mouse-over */
+        }
+
+        /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default look */
+            appearance: none;
+            width: 25px; /* Set a specific slider handle width */
+            height: 25px; /* Slider handle height */
+            background: #4CAF50; /* Green background */
+            cursor: pointer; /* Cursor on hover */
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px; /* Set a specific slider handle width */
+            height: 25px; /* Slider handle height */
+            background: #4CAF50; /* Green background */
+            cursor: pointer; /* Cursor on hover */
+        }
+    </style>
+		
+   </head>
+ 
+   <body onload = "onload();" >
+      <div id = "sse">
+         <H1 >Chuck audio HTML control sliders</H1>
+
+         <div class="slidecontainer">
+            <label for="mySlider1">V1 modulato freq : </label>
+            <input type="range" min="0" max="127" value="00" class="slider" id="mySlider1" oninput ="msg['slider/1'][1] = parseInt(this.value); WebSocketSend();"><br>
+            <label for="mySlider2">V1 modulator gain : </label>
+            <input type="range" min="0" max="127" value="00" class="slider" id="mySlider2" oninput ="msg['slider/2'][1] = parseInt(this.value); WebSocketSend();"><br>
+            <label for="mySlider3">V1 attack -------:</label>
+            <input type="range" min="0" max="127" value="00" class="slider" id="mySlider3" oninput ="msg['slider/3'][1] = parseInt(this.value); WebSocketSend();"><br>
+            <label for="mySlider4">V1 decay  -------:</label>
+            <input type="range" min="0" max="127" value="00" class="slider" id="mySlider4" oninput ="msg['slider/4'][1] = parseInt(this.value); WebSocketSend();"><br>
+            <label for="mySlider5">V1 sustain ------:</label>
+            <input type="range" min="0" max="127" value="00" class="slider" id="mySlider5" oninput ="msg['slider/5'][1] = parseInt(this.value); WebSocketSend();"><br>
+            <label for="mySlider6">V1 release ------:</label>
+            <input type="range" min="0" max="127" value="00" class="slider" id="mySlider6" oninput ="msg['slider/6'][1] = parseInt(this.value); WebSocketSend();"><br>
+            <label for="mySlider7">V2 attack -------:</label>
+            <input type="range" min="0" max="127" value="00" class="slider" id="mySlider7" oninput ="msg['slider/7'][1] = parseInt(this.value); WebSocketSend();"><br>
+            <label for="mySlider8">V2 decay  -------:</label>
+            <input type="range" min="0" max="127" value="00" class="slider" id="mySlider8" oninput ="msg['slider/8'][1] = parseInt(this.value); WebSocketSend();"><br>
+            <label for="mySlider9">V2 sustain ------:</label>
+            <input type="range" min="0" max="127" value="00" class="slider" id="mySlider9" oninput ="msg['slider/9'][1] = parseInt(this.value); WebSocketSend();"><br>
+            <label for="mySlider10">V2 release ------:</label>
+            <input type="range" min="0" max="127" value="00" class="slider" id="mySlider10" oninput ="msg['slider/10'][1] = parseInt(this.value); WebSocketSend();"><br>
+        
+         </div>
+      </div>   
+   </body>
+</html>

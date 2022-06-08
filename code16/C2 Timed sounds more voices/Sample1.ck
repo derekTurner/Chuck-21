@@ -1,4 +1,4 @@
-public class Sample extends Chubgraph
+public class Sample1 extends Chubgraph
 {
     // select sample file from this list or your own sample
  

@@ -1,4 +1,4 @@
-public class Sound extends Chubgraph
+public class Sound1 extends Chubgraph
 {
    1.00 => float a1;  
    0.50 => float a2;
