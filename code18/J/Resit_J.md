@@ -89,3 +89,36 @@ If you don't have a controller keyboard and want to test the operation of the ch
 
 You will need to [download processing](https://processing.org/download) to run this.  My GUI was written on processing 3 but I have tested it and it also works on processing 4 beta.  The code will run on Mac or PC.
 
+![procesing download](images/processingdown.png)
+
+Take care to download the version which matches your machine and processor.  This Beta version 4.8 bet 8 is ok to use.
+
+Unzip this to your machine and run processing.  You should be presented with a blank editor screen.
+
+![openprocessing](images/openprocessing.png)
+
+At the top of the screen open the menu: Sketch | Import Library | Manage libraries
+
+Search for the oscP5 library and install this.
+
+![p5OSC](images/manageLib.png)
+
+In the code19 download files, find the gui_9osc folder and copy this to a convenient location on your machine.  In the documents folder for instance.
+
+In the folder you will find a file named gui9_osc.pde it is essential within processing that the name of the main file matches the name of the enclosing folder.
+
+![gui files](images/guifiles.png)
+
+Within processing, file | open the file gui9_osc.pde and all the associated files will also be loaded into the processing editor.
+
+![gui code](images/gui9code.png)
+
+YOu can see that the code depends on the library which has just been imported.  You don't need to know the detail of this code.
+
+Press the "play" triangle icon to run the programme.
+
+The programme will dispay a resizeable piano keyboard which uses osc in the backgraound to send messages to chuck which emulate the novation keyboard.  The main limitation is that you can only play one key at once even though the program to be developed will be polyphonic.
+
+![guirunning](images/gui9running.png)
+
+You can leave this program quietly running in the background.
