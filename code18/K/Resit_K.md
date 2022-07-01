@@ -59,7 +59,8 @@ The funtion MidiGo will be called from the main polyplayer program.  This connec
             watchSP @=> midisp;
             spork ~ handleNoteOn(noteOn);
             spork ~ handleNoteOff(noteOff);
-            spork ~ handlePad(pad);
+            spork ~ handlePadOn(padOn);
+            spork ~ handlePadOff(padOff);
             spork ~ handleController(controller);
 
             second => now;
@@ -73,9 +74,11 @@ The function tries to open the midi device using the value of myPort which is se
                     ((msg.data1 & 0x70)>>4) => cmd;// upper nible     
                     (msg.data1 & 0x0f) => chan;// lower nibble
                         
-                    if (cmd == 0)                   {noteOff.broadcast(); me.yield();continue;}
-                    if (cmd == 1)                   {noteOn.broadcast(); me.yield();continue;}
-                    if ((chan == 9) && (cmd == 1))  {pad.broadcast(); me.yield();continue;}
+                    if ((cmd == 0) && (chan != 9)&& (chan != 8))  {noteOff.broadcast(); me.yield();continue;}
+                    if ((cmd == 1) && (chan != 9)&& (chan != 8))  {noteOn.broadcast();  me.yield();continue;}
+                    if ((cmd == 1) && (chan == 9))  {padOn.broadcast();   me.yield();continue;}
+                    if ((cmd == 0) && (chan == 8))  {padOff.broadcast();   me.yield();continue;}
+                    if ((cmd == 1) && (chan == 8))  {padOn.broadcast();  me.yield();continue;}
                     if (cmd == 3) {controller.broadcast(); me.yield();}
                 }
             }
@@ -88,7 +91,12 @@ The first byte of midi data is interpreted to determine which midi command it re
 
 Commands 0 and 1 are noteOff and noteOn so the noteOn or noteOff events are triggered.  The line me.yield() allows the computer to give processing time priority to the other sporked strands so that the response latency is cut down.
 
-When a noteOn command comes from midi channel 9 (or channel 10 in hardware labelling) this is caused for this keyboard by pressing one of the 16 pads.  The broadcast pad event will allow a response to play a sample.
+When a noteOn command comes from midi channel 9 (or channel 10 in hardware labelling) this is caused for this keyboard by pressing one of the 16 pads.  The broadcast pad event will allow a response to play a sample as a one shot event.
+
+When a noteOn command comes from midi channel 8 (or channel 9 in hardware labelling) this is caused for this keyboard by pressing one of the 16 pads.  The broadcast pad event will allow a response to play a sample as a held event with a padOff event triggered when a key is lifted.
+
+If you are using keyboard pads to play samples then these are usually one shot hits, however if you are using a piano keyboard to play samples you might want to release samples when the keyboard key is released.
+
 
 If command = 3 this represents an continuous controllor from activating a slider, dial or button, so the controller event is broadcast.
 
@@ -120,20 +128,17 @@ The handleNoteOn function sits waiting for a noteOn event.  When this is recieve
 The note off handler operates in an equivalent way.  It only sends one databyte to the polyvoice noteOff function because the velocity is always zero for noteOff.
 
 ```c    
-
-    function void handlePad(Event pad){   
+    function void handlePadOn(Event padOn){   
         while( true )
         {   
-            pad => now;    
-            <<< "channel 9 note: ", msg.data1, msg.data2, msg.data3 >>>;
-            if( cmd == 1 ){//note on
-                for(0 => int i; i<pads.cap(); i++){
-                    if (msg.data2 == pads[i]){
-                        midisp.play(i, msg.data3); 
-                        break;
-                    }    
+            padOn => now;    
+            <<< "channel", chan + 1, "padOn: ", msg.data1, msg.data2, msg.data3 >>>;
+            for(0 => int i; i<pads.cap(); i++){
+                if (msg.data2 == pads[i]){
+                    midisp.play(i, msg.data3); 
+                    break;
                 }    
-            }          
+            }             
         }       
     }
 ```
@@ -141,8 +146,24 @@ The note off handler operates in an equivalent way.  It only sends one databyte 
 The pad handler prints the midi message confirming that data came in ion channel 9.  The incoming midi note is checked against each of the midi notes held in the pads array until a match is found.  This identifies which midi sample should be played.
 
 ```c
+    function void handlePadOff(Event padOff){   
+        while( true )
+        {   
+            padOff => now;    
+            <<< "channel", chan + 1, "padOff: ", msg.data1, msg.data2, msg.data3 >>>;
+            for(0 => int i; i<pads.cap(); i++){
+                if (msg.data2 == pads[i]){
+                    midisp.release(i, msg.data3); 
+                    break;
+                }    
+            }                  
+        }       
+    }
+```
 
+Samples can be released in response to the paddOff event caused by releasing a key on Midi channel 9 (hardware).
 
+```c
     function void handleController(Event controller){
         false => int sliderFound;
          while( true )
@@ -232,6 +253,7 @@ public class SamplePlayer extends Chubgraph
 
  
     // setup and play 16 samples with control from controllers 21 - 28
+    // added release phase
  
     ["clap_01","click_01","click_02","cowbell_01","hihat_01","hihat_02",
      "hihat_04","kick_01","kick_04","snare_01","snare_02","snare_03",
@@ -261,22 +283,22 @@ The sounds are stored into 16 buffers, one for each available pad, so make sure 
 Don't change any other code in this file.
 
 ```c    
-
-    function void playsound(int sampleNo , int vel){
+    function void play(int sampleNo , int vel){
         vel/127.0 => buffers[sampleNo].gain;
         0 => buffers[sampleNo].pos;
-        <<<fileNames[sampleNo], sampleLengths[sampleNo],sampleNo, vel>>>;
-        sampleLengths[sampleNo] :: samp => now;
-    }
-    
-    function void play(int sampleNo , int vel){
-         <<<"play: ",sampleNo, vel>>>;
-        spork ~ playsound(sampleNo, vel);     
+        <<<"play", fileNames[sampleNo], sampleLengths[sampleNo],sampleNo, vel>>>;
     }
  ```
-The function play will print the message to confirm which sample is requested and then run the playsound function in its own thread.
+The function play will print the message to confirm which sample is requested and then move the position of the selected buffer to the start of the buffer allowing the sample to play.
 
-Spork has been used to start some threads which keep running while the program continues to run, but the playsound functin will close when the sound has played so the thread needs to be started each time.
+```c
+    function void release(int sampleNo , int vel){
+        vel/127.0 => buffers[sampleNo].gain;
+        sampleLengths[sampleNo] => buffers[sampleNo].pos;
+    }
+```
+The function release will move the position of the selected sample buffer to the end stopping the sample playback.
+
 
 The code for controlling the sample sounds is similar to that for the synthesised sounds.  In this demo only one controllable feature is listed.
 
