@@ -23,19 +23,17 @@ public class SamplePlayer extends Chubgraph
          buffers[i] => percGain;
     }
     
-    function void playsound(int sampleNo , int vel){
+    function void play(int sampleNo , int vel){
         vel/127.0 => buffers[sampleNo].gain;
         0 => buffers[sampleNo].pos;
-        <<<fileNames[sampleNo], sampleLengths[sampleNo],sampleNo, vel>>>;
-        sampleLengths[sampleNo] :: samp => now;
+        <<<"play", fileNames[sampleNo], sampleLengths[sampleNo],sampleNo, vel>>>;
     }
-    
-    function void play(int sampleNo , int vel){
-         <<<"play: ",sampleNo, vel>>>;
-        spork ~ playsound(sampleNo, vel);     
+
+    function void release(int sampleNo , int vel){
+        vel/127.0 => buffers[sampleNo].gain;
+        sampleLengths[sampleNo] => buffers[sampleNo].pos;
     }
-    
-    
+
     // name controllable elements of sound
     ["rate"] @=> string controls[];    
     

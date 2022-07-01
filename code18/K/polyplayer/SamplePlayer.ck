@@ -1,8 +1,7 @@
 public class SamplePlayer extends Chubgraph
 {
-
- 
     // setup and play 16 samples with control from controllers 21 - 28
+    // added release phase
  
     ["clap_01","click_01","click_02","cowbell_01","hihat_01","hihat_02",
      "hihat_04","kick_01","kick_04","snare_01","snare_02","snare_03",
@@ -23,24 +22,22 @@ public class SamplePlayer extends Chubgraph
          buffers[i] => percGain;
     }
     
-    function void playsound(int sampleNo , int vel){
+    function void play(int sampleNo , int vel){
         vel/127.0 => buffers[sampleNo].gain;
         0 => buffers[sampleNo].pos;
-        <<<fileNames[sampleNo], sampleLengths[sampleNo],sampleNo, vel>>>;
-        sampleLengths[sampleNo] :: samp => now;
+        <<<"play", fileNames[sampleNo], sampleLengths[sampleNo],sampleNo, vel>>>;
     }
-    
-    function void play(int sampleNo , int vel){
-         <<<"play: ",sampleNo, vel>>>;
-        spork ~ playsound(sampleNo, vel);     
+
+    function void release(int sampleNo , int vel){
+        vel/127.0 => buffers[sampleNo].gain;
+        sampleLengths[sampleNo] => buffers[sampleNo].pos;
     }
-    
-    
+
     // name controllable elements of sound
     ["rate"] @=> string controls[];    
     
     // define control functions specific to instrument
-    function void soundControl(int index, float value){      // value 0 - 127
+    function void soundControl(int index, float value){        // value 0 - 127
         if(index == 0){(2*value/127.0)-1  => buffers[0].rate;};// -1 - +1
         if(index == 1){(2*value/127.0)-1  => buffers[1].rate;};// -1 - +1
         if(index == 2){(2*value/127.0)-1  => buffers[2].rate;};// -1 - +1

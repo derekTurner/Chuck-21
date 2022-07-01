@@ -1,10 +1,14 @@
 public class MidiHandler 
-{ // modified 11/12/2020 Midi events are not handled quicker than before to prevent note off messages from being missed
+{ // modified 11/12/2020 Midi events are handled quicker than before to prevent note off messages from being missed
+  // modified 01/07/22 corrected missing sample sounds from keyboard 
+  // midi channel 10 for one shot samples such as percussion
+  // midi channel 9  for held samples such as keyboard samples held durations
 
     MidiIn midin;   
     Event noteOn;  
     Event noteOff;  
-    Event pad;   
+    Event padOn; 
+    Event padOff;
     Event controller;
     MidiMsg msg;
     int cmd;
@@ -27,7 +31,8 @@ public class MidiHandler
             watchSP @=> midisp;
             spork ~ handleNoteOn(noteOn);
             spork ~ handleNoteOff(noteOff);
-            spork ~ handlePad(pad);
+            spork ~ handlePadOn(padOn);
+            spork ~ handlePadOff(padOff);
             spork ~ handleController(controller);
 
             second => now;
@@ -38,9 +43,11 @@ public class MidiHandler
                     ((msg.data1 & 0x70)>>4) => cmd;// upper nible     
                     (msg.data1 & 0x0f) => chan;// lower nibble
                         
-                    if (cmd == 0)                   {noteOff.broadcast(); me.yield();continue;}
-                    if (cmd == 1)                   {noteOn.broadcast(); me.yield();continue;}
-                    if ((chan == 9) && (cmd == 1))  {pad.broadcast(); me.yield();continue;}
+                    if ((cmd == 0) && (chan != 9)&& (chan != 8))  {noteOff.broadcast(); me.yield();continue;}
+                    if ((cmd == 1) && (chan != 9)&& (chan != 8))  {noteOn.broadcast();  me.yield();continue;}
+                    if ((cmd == 1) && (chan == 9))  {padOn.broadcast();   me.yield();continue;}
+                    if ((cmd == 0) && (chan == 8))  {padOff.broadcast();   me.yield();continue;}
+                    if ((cmd == 1) && (chan == 8))  {padOn.broadcast();  me.yield();continue;}
                     if (cmd == 3) {controller.broadcast(); me.yield();}
                 }
             }
@@ -51,7 +58,7 @@ public class MidiHandler
         while( true )
         {   
             noteOn => now;
-            <<< "channel 0 note on: ", msg.data1, msg.data2, msg.data3 >>>;          
+            <<< "channel ", chan + 1, " note on: ", msg.data1, msg.data2, msg.data3 >>>;          
             midipv.noteOn(msg.data2, msg.data3);
         }       
     }
@@ -60,24 +67,36 @@ public class MidiHandler
         while( true )
         {   
             noteOff => now;
-            <<< "channel 0 noteOff: ", msg.data1, msg.data2, msg.data3 >>>;
+            <<< "channel",chan + 1, "noteOff: ", msg.data1, msg.data2, msg.data3 >>>;
             midipv.noteOff(msg.data2); 
         }       
     }
 
-    function void handlePad(Event pad){   
+    function void handlePadOn(Event padOn){   
         while( true )
         {   
-            pad => now;    
-            <<< "channel 9 note: ", msg.data1, msg.data2, msg.data3 >>>;
-            if( cmd == 1 ){//note on
-                for(0 => int i; i<pads.cap(); i++){
-                    if (msg.data2 == pads[i]){
-                        midisp.play(i, msg.data3); 
-                        break;
-                    }    
+            padOn => now;    
+            <<< "channel", chan + 1, "padOn: ", msg.data1, msg.data2, msg.data3 >>>;
+            for(0 => int i; i<pads.cap(); i++){
+                if (msg.data2 == pads[i]){
+                    midisp.play(i, msg.data3); 
+                    break;
                 }    
-            }          
+            }             
+        }       
+    }
+
+    function void handlePadOff(Event padOff){   
+        while( true )
+        {   
+            padOff => now;    
+            <<< "channel", chan + 1, "padOff: ", msg.data1, msg.data2, msg.data3 >>>;
+            for(0 => int i; i<pads.cap(); i++){
+                if (msg.data2 == pads[i]){
+                    midisp.release(i, msg.data3); 
+                    break;
+                }    
+            }                  
         }       
     }
 

@@ -16,7 +16,7 @@ An overview of the files making up the polyplayer application.
 
 The **MidiHandler.ck** file contains a MidiHandler class which responds to incoming midi messages.
 
-```c
+```javascript
 public class MidiHandler 
 { // modified 11/12/2020 Midi events are not handled quicker than before to prevent note off messages from being missed
 
@@ -47,7 +47,7 @@ The arrays for pads sliders and dials are the midi continuous controller values 
 
 The funtion MidiGo will be called from the main polyplayer program.  This connects to the midi port and moniitors input.
 
- ```c   
+ ```javascript   
     function void MidiGo(int myPort, PolyVoices watchPV, SamplePlayer watchSP ){  
         if( !midin.open(myPort) )  
         {
@@ -59,23 +59,26 @@ The funtion MidiGo will be called from the main polyplayer program.  This connec
             watchSP @=> midisp;
             spork ~ handleNoteOn(noteOn);
             spork ~ handleNoteOff(noteOff);
-            spork ~ handlePad(pad);
+            spork ~ handlePadOn(padOn);
+            spork ~ handlePadOff(padOff);
             spork ~ handleController(controller);
 
             second => now;
 ```
 The function tries to open the midi device using the value of myPort which is set in the main polyplayer.ck file.  If no midi device is found it prints an error warning, but the programme does not break, this allows the processing GUI keyboard to still be used. 
 
-```c
+```javascript
             while(true){ 
                 midin => now;
                 while( midin.recv(msg) ){   
                     ((msg.data1 & 0x70)>>4) => cmd;// upper nible     
                     (msg.data1 & 0x0f) => chan;// lower nibble
                         
-                    if (cmd == 0)                   {noteOff.broadcast(); me.yield();continue;}
-                    if (cmd == 1)                   {noteOn.broadcast(); me.yield();continue;}
-                    if ((chan == 9) && (cmd == 1))  {pad.broadcast(); me.yield();continue;}
+                    if ((cmd == 0) && (chan != 9)&& (chan != 8))  {noteOff.broadcast(); me.yield();continue;}
+                    if ((cmd == 1) && (chan != 9)&& (chan != 8))  {noteOn.broadcast();  me.yield();continue;}
+                    if ((cmd == 1) && (chan == 9))  {padOn.broadcast();   me.yield();continue;}
+                    if ((cmd == 0) && (chan == 8))  {padOff.broadcast();   me.yield();continue;}
+                    if ((cmd == 1) && (chan == 8))  {padOn.broadcast();  me.yield();continue;}
                     if (cmd == 3) {controller.broadcast(); me.yield();}
                 }
             }
@@ -88,11 +91,16 @@ The first byte of midi data is interpreted to determine which midi command it re
 
 Commands 0 and 1 are noteOff and noteOn so the noteOn or noteOff events are triggered.  The line me.yield() allows the computer to give processing time priority to the other sporked strands so that the response latency is cut down.
 
-When a noteOn command comes from midi channel 9 (or channel 10 in hardware labelling) this is caused for this keyboard by pressing one of the 16 pads.  The broadcast pad event will allow a response to play a sample.
+When a noteOn command comes from midi channel 9 (or channel 10 in hardware labelling) this is caused for this keyboard by pressing one of the 16 pads.  The broadcast pad event will allow a response to play a sample as a one shot event.
+
+When a noteOn command comes from midi channel 8 (or channel 9 in hardware labelling) this is caused for this keyboard by pressing one of the 16 pads.  The broadcast pad event will allow a response to play a sample as a held event with a padOff event triggered when a key is lifted.
+
+If you are using keyboard pads to play samples then these are usually one shot hits, however if you are using a piano keyboard to play samples you might want to release samples when the keyboard key is released.
+
 
 If command = 3 this represents an continuous controllor from activating a slider, dial or button, so the controller event is broadcast.
 
- ```c   
+ ```javascript   
     // ----------------- handle midi events -----------------------//
     function void handleNoteOn(Event noteOn){   
         while( true )
@@ -106,7 +114,7 @@ If command = 3 this represents an continuous controllor from activating a slider
 ```
 The handleNoteOn function sits waiting for a noteOn event.  When this is recieved a message is printed showing the three byte midi message.  The two data bytes of the midi message are passed to the noteOn function of the midi polyvoice (defined in a separate file).
 
-```c
+```javascript
 
     function void handleNoteOff(Event noteOff){   
         while( true )
@@ -119,30 +127,43 @@ The handleNoteOn function sits waiting for a noteOn event.  When this is recieve
 ```
 The note off handler operates in an equivalent way.  It only sends one databyte to the polyvoice noteOff function because the velocity is always zero for noteOff.
 
-```c    
-
-    function void handlePad(Event pad){   
+```javascript    
+    function void handlePadOn(Event padOn){   
         while( true )
         {   
-            pad => now;    
-            <<< "channel 9 note: ", msg.data1, msg.data2, msg.data3 >>>;
-            if( cmd == 1 ){//note on
-                for(0 => int i; i<pads.cap(); i++){
-                    if (msg.data2 == pads[i]){
-                        midisp.play(i, msg.data3); 
-                        break;
-                    }    
+            padOn => now;    
+            <<< "channel", chan + 1, "padOn: ", msg.data1, msg.data2, msg.data3 >>>;
+            for(0 => int i; i<pads.cap(); i++){
+                if (msg.data2 == pads[i]){
+                    midisp.play(i, msg.data3); 
+                    break;
                 }    
-            }          
+            }             
         }       
     }
 ```
 
 The pad handler prints the midi message confirming that data came in ion channel 9.  The incoming midi note is checked against each of the midi notes held in the pads array until a match is found.  This identifies which midi sample should be played.
 
-```c
+```javascript
+    function void handlePadOff(Event padOff){   
+        while( true )
+        {   
+            padOff => now;    
+            <<< "channel", chan + 1, "padOff: ", msg.data1, msg.data2, msg.data3 >>>;
+            for(0 => int i; i<pads.cap(); i++){
+                if (msg.data2 == pads[i]){
+                    midisp.release(i, msg.data3); 
+                    break;
+                }    
+            }                  
+        }       
+    }
+```
 
+Samples can be released in response to the paddOff event caused by releasing a key on Midi channel 9 (hardware).
 
+```javascript
     function void handleController(Event controller){
         false => int sliderFound;
          while( true )
@@ -182,7 +203,7 @@ You should not change this file.
 
 The file **Sound.ck** contains the sound patch and control functions.  You will customise this file with your own patch and control functions.
 
-```c
+```javascript
 public class Sound extends Chubgraph
 {
    Rhodey piano => JCRev reverb => outlet; 
@@ -199,7 +220,7 @@ The file as provided uses an STK instrument going to the outlet via a reverb.  Y
 The variable name piano is used elsewhere, regard this as a keyword and do not change it even if your patch sounds nothing like a piano.
 
 
-```c   
+```javascript   
    // name controllable elements of sound
    ["speed","lfoDepth","aftertouch","control1","control2","mix"] @=> string controls[];    
      
@@ -226,12 +247,13 @@ The samples which will be played when the keyboard pads are struck are determine
 
 It should be a relatively easy step to replace the samples listed here with your own.
 
-```c
+```javascript
 public class SamplePlayer extends Chubgraph
 {
 
  
     // setup and play 16 samples with control from controllers 21 - 28
+    // added release phase
  
     ["clap_01","click_01","click_02","cowbell_01","hihat_01","hihat_02",
      "hihat_04","kick_01","kick_04","snare_01","snare_02","snare_03",
@@ -260,28 +282,28 @@ As the buffers are loaded they are pointed to the Gain named percGate to compete
 The sounds are stored into 16 buffers, one for each available pad, so make sure you have 16 filenames in your list.
 Don't change any other code in this file.
 
-```c    
-
-    function void playsound(int sampleNo , int vel){
+```javascript    
+    function void play(int sampleNo , int vel){
         vel/127.0 => buffers[sampleNo].gain;
         0 => buffers[sampleNo].pos;
-        <<<fileNames[sampleNo], sampleLengths[sampleNo],sampleNo, vel>>>;
-        sampleLengths[sampleNo] :: samp => now;
-    }
-    
-    function void play(int sampleNo , int vel){
-         <<<"play: ",sampleNo, vel>>>;
-        spork ~ playsound(sampleNo, vel);     
+        <<<"play", fileNames[sampleNo], sampleLengths[sampleNo],sampleNo, vel>>>;
     }
  ```
-The function play will print the message to confirm which sample is requested and then run the playsound function in its own thread.
+The function play will print the message to confirm which sample is requested and then move the position of the selected buffer to the start of the buffer allowing the sample to play.
 
-Spork has been used to start some threads which keep running while the program continues to run, but the playsound functin will close when the sound has played so the thread needs to be started each time.
+```javascript
+    function void release(int sampleNo , int vel){
+        vel/127.0 => buffers[sampleNo].gain;
+        sampleLengths[sampleNo] => buffers[sampleNo].pos;
+    }
+```
+The function release will move the position of the selected sample buffer to the end stopping the sample playback.
+
 
 The code for controlling the sample sounds is similar to that for the synthesised sounds.  In this demo only one controllable feature is listed.
 
 
- ```c   
+ ```javascript   
     
     // name controllable elements of sound
     ["rate"] @=> string controls[];    
@@ -316,7 +338,7 @@ You do not need to know the details of **OscHandler.ck** the purpose of the file
 
 Do not edit this file.
 
-```c
+```javascript
 public class OscHandler 
 {
     Event oscNote;   
@@ -440,7 +462,7 @@ The file **PolyVoices.ck** enables a polyphonic keyboard.
 
 You do not need to know the details of this file and should not edit it.
 
-```c
+```javascript
 public class PolyVoices extends Chubgraph
 {
     // Dont edit anything in this class
@@ -471,7 +493,7 @@ Each of the voices in the array is chucked into a gain named mix which then goes
 
 The mix.gain is kept low to avoid clipping.
 
-```c 
+```javascript 
         
 //  ---------------   methods for poly sound ------------------//
 
@@ -488,7 +510,7 @@ The mix.gain is kept low to avoid clipping.
 ```
 The setcontrol function recieves control messages from the midi and osc handlers and applies these to every voice.
 
-```c    
+```javascript    
     function void noteOn(int note, int vel){
         note => buffer[bufferIn];
         Std.mtof( note ) => voices[bufferIn].setFreq;
@@ -501,7 +523,7 @@ The setcontrol function recieves control messages from the midi and osc handlers
 ```
 When noteOn is called the frequency is set and the note sounded for the voice in the array indicated by the variable bufferIn.  Buffer in then increases to point to the next voice which wil pick up the next noteon.  When bufferIn exceeds the size of the buffer it is pointed back to the beginning and this kind of action defines a circular buffer.
 
-```c    
+```javascript    
 
     function void noteOff(int note){
         indexOf(note, buffer, 0) => index;
@@ -511,11 +533,11 @@ When noteOn is called the frequency is set and the note sounded for the voice in
         }
     }    
 
-```c
+```javascript
 When a noteOff function is called this may not apply to the most recent note played.  The indexOf function is called to see which voice last played the note with the midivalue which is to be turned off.  When the index is known the correct indexed note can be turned off.
 
 
-```c
+```javascript
 
     function int indexOf(int value, int buff[],int start){ //look for value in circular buffer 
         -1 => int result;
@@ -540,7 +562,7 @@ When a noteOff function is called this may not apply to the most recent note pla
 
 The **polyplayer** file contains the frontend to operate the other classes.  Key information which the user may need to edit is gathered at the top of the file.
 
-```c
+```javascript
 // midiPolyClassSoundTemplate.ck
 // process midi note and control messages
 // recieved using two threads
@@ -588,7 +610,7 @@ A useful utility to see what the device numbers are on your machine is
 
 > chuck --probe
 
-```code
+```javascriptode
 [chuck]: found 7 device(s) ...
 [chuck]: ------( audio device: 1 )---------------
 [chuck]: device name = "Apple Inc.: Built-in Microphone"
